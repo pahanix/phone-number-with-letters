@@ -1,14 +1,15 @@
-## Special Phone Number Converter
+# Special Phone Number Converter
 
 Lib converts phone numbers like 1-800-PRINT-ME into 1-800-77468-63
 
-# Prehistory
+## Prehistory
 
-FedEx require phone numbers and strip all the non digit stuff from provided phone number. 
+FedEx requires phone numbers and strips all the non digit stuff from provided phone number. 
 Most of the time it's ok. But it has got a problem with special phone numbers which contain characters
 (1-800-FLOWERS, 1-800-APL-CARE, 1-877-AXP-GIFT etc). They become too short and invalid. 
 
 1-800-FLOWERS becomes just 1800 instead of 18003569377
+
 1-877-AXP-GIFT becomes just 1877 instead of 18772974438
 
 This lib converts special phone number into usual digit phone number 
