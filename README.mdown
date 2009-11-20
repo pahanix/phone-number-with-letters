@@ -4,13 +4,12 @@ Lib converts phone numbers like 1-800-PRINT-ME into 1-800-77468-63
 
 ## Prehistory
 
-FedEx requires phone numbers and strips all the non digit stuff from provided phone number. 
+FedEx API requires phone numbers and strips all the non digit stuff from provided phone number. 
 Most of the time it's ok. But it has got a problem with special phone numbers which contain characters
 (1-800-FLOWERS, 1-800-APL-CARE, 1-877-AXP-GIFT etc). They become too short and invalid. 
 
-1-800-FLOWERS becomes just 1800 instead of 18003569377
-
-1-877-AXP-GIFT becomes just 1877 instead of 18772974438
+  - 1-800-FLOWERS becomes just 1800 instead of 18003569377
+  - 1-877-AXP-GIFT becomes just 1877 instead of 18772974438
 
 This lib converts special phone number into usual digit phone number 
 which could be passed to an API and don't be damaged. Or it can be used for any other reason :)
@@ -22,6 +21,36 @@ which could be passed to an API and don't be damaged. Or it can be used for any 
     SpecialPhoneNumber.decode("1-800-PRINT-ME") # => "1-800-77468-63"
     SpecialPhoneNumber.decode("1-800-FLOWERS")  # => "1-800-3569377"
     SpecialPhoneNumber.decode("1-800-APL-CARE") # => "1-800-275-2273"
+    
+## Normalizing
+
+Usually phone number (in USA) contains 11 characters (digits), but special phone number 
+can contain more then 11 characters to be more rememberable. For example
+
+  - "1-877-4-APL-PROMO" (13 chars) corresponds to "1-877-4-275-776" (11 digits)
+  - "1-800-MY-IPHONE" (12 chars) corresponds to "1-800-69-47466" (11 digits)
+  - "1.877.KARS.4.KIDS." (13 chars) corresponds to "1-877-5277-4-54" (11 digits)
+  
+Simple number decoding of "1-877-4-APL-PROMO" gives us 13 characters "1-877-4-275-77666" with 2 extra digits
+But real number should be "1-877-4-275-776". 
+
+Here comes **SpecialPhoneNumber::normalize**
+
+    # decode do nothing with extra digits
+    SpecialPhoneNumber.decode("1-877-4-APL-PROMO")    # => "1-877-4-275-77666"
+    
+    # normalize cuts extra digits
+    SpecialPhoneNumber.normalize("1-877-4-APL-PROMO") # => "1-877-4-275-776"
+
+If you have a phone number with necessary extra digits, you can specify how much characters 
+the number should contain by passing :base option to the ::normalize. Default value is 11.
+
+    SpecialPhoneNumber.normalize("1.877.KARS.4.KIDS.", :base => 13) # => "1-877-5277-4-5437"
+    SpecialPhoneNumber.normalize("1.877.KARS.4.KIDS.", :base => 8)  # => "1-877-5277"
+    
+Also you can specify separator for groups of digits by passing :separator option. Default option is dash '-'.
+
+    SpecialPhoneNumber.normalize("1-877-4-APL-PROMO", :separator => '.')  # => "1.877.4.275.776"
     
 ## Copiright
 
