@@ -12,7 +12,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 
 describe SpecialPhoneNumber do
-  describe "::decode" do
+  describe "::translate" do
     {
       "1-800-APPLE-TV"  => "1-800-27753-88" ,
       "1-800-PRINT-ME"  => "1-800-77468-63" ,
@@ -23,57 +23,46 @@ describe SpecialPhoneNumber do
       "1 800 got junk"  => "1 800 468 5865" ,
       "1 800 pick ups"  => "1 800 7425 877" ,
       "1-800-APL-CARE"  => "1-800-275-2273" ,
-      "1-877-AXP-GIFT"  => "1-877-297-4438"     
+      "1-877-AXP-GIFT"  => "1-877-297-4438" ,
+      
+      # should not translate x or ext to digits
+      "1-209-233-1111 x12345"   => "1-209-233-1111 x12345",
+      "1-555-123-4567 ext12345" => "1-555-123-4567 ext12345",
+      "1.800.275.2273 x.1234"   => "1.800.275.2273 x.1234"
     }.
-    each do |letter_number, pure_number|
-      it "should decode #{letter_number} to #{pure_number}" do
-        SpecialPhoneNumber.decode(letter_number).should == pure_number
+    each do |letter_number, digit_number|
+      it "should translate #{letter_number} to #{digit_number}" do
+        SpecialPhoneNumber.translate(letter_number).should == digit_number
       end
     end
     
     describe "with extra spaces" do 
-      it "should decode ' 1  800  got junk  ' to '1 800 468 5865'" do
-        SpecialPhoneNumber.decode(' 1  800  got junk  ').should == '1 800 468 5865'
+      it "should translate ' 1  800  got junk  ' char by char" do
+        SpecialPhoneNumber.translate(' 1  800  got junk  ').should == ' 1  800  468 5865  '
       end
     end
   end
   
-  describe "::normalize" do
+  describe "::convert" do
     {
-      "1-877-4-APL-PROMO"     => "1-877-4-275-776",
-      "1-800-MY-IPHONE"       => "1-800-69-47466" ,
-      "1.877.KARS.4.KIDS."    => "1-877-5277-4-54",
-      "1 800 postcards"       => "1-800-7678227"  ,
-      "1 800 mattress"        => "1-800-6288737"  ,
-      "1 800 mattress 0044"   => "1-800-6288737"  ,
-      "1.800.matt.res.s.007"  => "1-800-6288-737"  
+      "1-877-4-APL-PROMO"           => "1-877-4-275-776",
+      "1-800-MY-IPHONE"             => "1-800-69-47466",
+      "1.877.KARS.4.KIDS."          => "1.877.5277.4.54",
+      "1 800 postcards"             => "1 800 7678227",
+      "1 800 mattress"              => "1 800 6288737",
+      # a very strange phone numbers :-)
+      "1.800.mattress x007"         => "1.800.6288737 x007",
+      "1.877.KARS.4.KIDS. ext1234"  => "1.877.5277.4.54 ext1234",
+      "1.877.5277.4.54 ext1234"     => "1.877.5277.4.54 ext1234"
     }.
-    each do |letter_number, pure_number|
-      it "should normalize #{letter_number} to #{pure_number}" do
-        SpecialPhoneNumber.normalize(letter_number).should == pure_number
+    each do |letter_number, digit_number|
+      it "should convert #{letter_number} to #{digit_number}" do
+        SpecialPhoneNumber.convert(letter_number).should == digit_number
       end
     end
-  
-    it "should normalize '1.800.POSTCARDS' to '1-800-7678' with base (8)" do
-      SpecialPhoneNumber.normalize("1.800.POSTCARDS", :base => 8).should == "1-800-7678"
-    end
 
-    it "should normalize '1-800-POSTCARDS' to '1.800.7678227' with separator (.)" do
-      SpecialPhoneNumber.normalize("1-800-POSTCARDS", :separator => '.').should == "1.800.7678227"
-    end
-
-    it "should normalize '1-800 POSTCARDS' to '1.800.767822' with base (10) and separator (.)" do
-      SpecialPhoneNumber.normalize("1-800 POSTCARDS", :base => 10, :separator => '.').should == "1.800.767822"
-    end
-
-    describe "with extra spaces" do
-      it "should normalize '  1-800  POST  CARDS ' to '1.800.7678.22' with base (10) and separator (.)" do
-        SpecialPhoneNumber.normalize(" 1-800  POST  CARDS ", :base => 10, :separator => '.').should == "1.800.7678.22"
-      end
-
-      it "should normalize ' 1-800  POST ' to '1.800.7678' with separator (.) and numbers less than base (10)" do
-        SpecialPhoneNumber.normalize(" 1-800  POST ", :base => 10, :separator => '.').should == "1.800.7678"
-      end
+    it "should convert '1.800.POSTCARDS' to '1-800-7678' with base (8)" do
+      SpecialPhoneNumber.convert("1.800.POSTCARDS", 8).should == "1.800.7678"
     end
   end  
 end

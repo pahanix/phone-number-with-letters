@@ -19,18 +19,32 @@ module SpecialPhoneNumber
   
   DECODE_MAP.freeze
 
-  def decode(number)
-    number.to_s.strip.gsub(/\s+/, ' ').split('').map{ |symbol| DECODE_MAP[symbol.downcase] || symbol }.join
-  end
+  class << self    
+    def translate(phone_number)
+      base_number, ext_number = split(phone_number)
+      base_number = decode(base_number)
+      [base_number, ext_number].join
+    end
   
-  alias_method :decode_phone_number, :decode
-  
-  def normalize(phone_number, options = {})
-    options = { :base => 11, :separator => '-'}.merge(options)
-    phone_number = decode(phone_number).gsub(/[^\d]/, options[:separator])
-    phone_number[/(\d[^\d]*){#{options[:base]-1}}\d/] || phone_number
-  end
-  
-  module_function :decode
-  module_function :normalize
+    def convert(phone_number, base = 11)
+      base_number, ext_number = split(phone_number)
+      base_number = decode(base_number)
+      base_number = cut_off(base_number, base)
+      [base_number, ext_number].join
+    end
+    
+    def split(phone_number)
+      phone_number.to_s.split(/(\s*e?xt?(?:ention)?\.?\s*\d{1,5}\s*)$/)
+    end
+    
+    private
+    
+    def decode(base_number)
+      base_number.to_s.split('').map{ |symbol| DECODE_MAP[symbol.downcase] || symbol }.join
+    end 
+        
+    def cut_off(base_number, base)
+      base_number[/(\d[^\d]*){#{base-1}}\d/] || base_number
+    end
+  end  
 end
