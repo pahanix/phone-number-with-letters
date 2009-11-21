@@ -1,4 +1,4 @@
-module SpecialPhoneNumber
+module PhoneNumberWithLetters
 
   DECODE_MAP = {}
 

@@ -11,7 +11,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 # ======================== #
 
 
-describe SpecialPhoneNumber do
+describe PhoneNumberWithLetters do
   describe "::translate" do
     {
       "1-800-APPLE-TV"  => "1-800-27753-88" ,
@@ -32,13 +32,13 @@ describe SpecialPhoneNumber do
     }.
     each do |letter_number, digit_number|
       it "should translate #{letter_number} to #{digit_number}" do
-        SpecialPhoneNumber.translate(letter_number).should == digit_number
+        PhoneNumberWithLetters.translate(letter_number).should == digit_number
       end
     end
     
     describe "with extra spaces" do 
       it "should translate ' 1  800  got junk  ' char by char" do
-        SpecialPhoneNumber.translate(' 1  800  got junk  ').should == ' 1  800  468 5865  '
+        PhoneNumberWithLetters.translate(' 1  800  got junk  ').should == ' 1  800  468 5865  '
       end
     end
   end
@@ -57,12 +57,12 @@ describe SpecialPhoneNumber do
     }.
     each do |letter_number, digit_number|
       it "should convert #{letter_number} to #{digit_number}" do
-        SpecialPhoneNumber.convert(letter_number).should == digit_number
+        PhoneNumberWithLetters.convert(letter_number).should == digit_number
       end
     end
 
     it "should convert '1.800.POSTCARDS' to '1-800-7678' with base (8)" do
-      SpecialPhoneNumber.convert("1.800.POSTCARDS", 8).should == "1.800.7678"
+      PhoneNumberWithLetters.convert("1.800.POSTCARDS", 8).should == "1.800.7678"
     end
   end  
 end
